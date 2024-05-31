@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="ru" style="font-family: 'Tahoma', sans-serif;">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="favicon">
+        <link rel="shortcut icon" href="favicon.ico" type="image/x-icon">
+        <link rel="icon" href="favicon.png">
+    <title>Валюта </title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+        }
+        header {
+            background-color: #00698f;
+            color: white;
+            padding: 10px;
+            position: fixed;
+            top: 0;
+            width: 100%;
+            z-index: 1;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        nav ul {
+            list-style-type: none;
+            margin: 0;
+            padding: 0;
+            display: flex;
+        }
+        nav li {
+            margin-right: 20px;
+        }
+        nav a {
+            color: white;
+            text-decoration: none;
+            padding: 10px;
+        }
+        nav a:hover {
+            background-color: #4CAF50;
+            color: white;
+        }
+        nav a.active {
+            background-color: #4CAF50;
+            color: white;
+            font-weight: bold;
+        }
+        main {
+            margin-top: 80px;
+        }
+        h1 {
+            font-size: 24px;
+            font-weight: bold;
+            color: #00698f;
+        }
+        h2 {
+            font-size: 18px;
+            font-weight: bold;
+            color: #00698f;
+        }
+        h3 {
+            font-size: 16px;
+            font-weight: bold;
+            color: #00698f;
+        }
+        .underline {
+            text-decoration: underline;
+        }
+        .italic {
+            font-style: italic;
+        }
+        
+    </style>
+</head>
+<body onload="getCurr()">
+    <header>
+        <nav>
+            <ul>
+                <li><a href="companiya.html">Главная</a></li>
+                <li><a href="news.html" >Новости</a></li>
+                <li><a href="valuta.html" class="active" >Курс валют</a></li>
+                <li><a href="#">Контакты</a></li>
+            </ul>
+        </nav>
+    </header>
+    
+    <main>
+        <div class="container">
+            <p>Калькулятор валют</p>
+        </div>
+
+        <div class="general">
+            <div class="block">
+                <select class="currency-select" id="currency-select1">
+                    <option value="RUB" selected>Российский рубль (RUB)</option>
+                    <option value="UZ">Узбекский сум (UZS)</option>
+                </select><br>
+                <div class="boxxx">
+                    <div class="forval"><input id="numb1" type="number" value="1" min="0" onkeydown="return event.key !== '-';"><span class="currency-symbol">&#8381</span></div>
+                    <div id="output1"></div>
+                </div>
+            </div>
+
+            <div class="smallblock"><button id="butto" onclick="changing()">⇄</button></div>
+
+            <div class="block">
+                <select class="currency-select" id="currency-select2">
+                    <option value="RUB">Российский рубль (RUB)</option>
+                    <option value="UZ" selected>Узбекский сум (UZS)</option>
+                </select><br>
+                <div class="boxxx">
+                    <div class="forval"><input id="numb2" type="number" value="" readonly><span class="currency-symbol"><U></U></span></div>
+                    <div id="output2"></div>
+                </div>
+            </div>
+        </div>
+
+    </main>
+
+   
+
+    <script>
+        let imp = document.getElementById('numb1');
+        let result = document.getElementById('numb2');
+        let output1 = document.getElementById('output1');
+        let output2 = document.getElementById('output2');
+        let UZS;
+        let Rus;
+
+        function getCurr() {
+            const url = 'https://www.cbr-xml-daily.ru/daily_json.js';
+            fetch(url)
+                .then(function(response) {
+                    return response.json();
+                })
+                .then(function(json) {
+                    Rus = json.Valute.UZS.Value / json.Valute.UZS.Nominal;
+                    UZS = (1 / Rus).toFixed(4); 
+                    result.value = UZS;
+                    output1.innerText = `1 RUB = ${UZS} UZ`;
+                    output2.innerText = `1 UZ = ${Rus} RUB`;
+                    imp.addEventListener('input', function() {
+                        number = parseFloat(this.value) || 0;
+                        result.value = (number * UZS).toFixed(4);
+                    });
+                })
+        }
+
+        const znak = document.querySelectorAll('.currency-symbol');
+
+        document.addEventListener('DOMContentLoaded', (event) => {
+            const selectElements = document.querySelectorAll('.currency-select');
+
+            selectElements.forEach(selectElement => {
+                selectElement.addEventListener('change', (event) => {
+                    const selectedValue1 = selectElements[0].value;
+                    const selectedValue2 = selectElements[1].value;
+                    SelectChange(selectedValue1, selectedValue2);
+                });
+            });
+
+            function SelectChange(value1, value2) {
+                if (value1 === 'RUB' && value2 === 'UZ') {
+                    output1.innerText = `1 RUB = ${UZS} UZ`;
+                    output2.innerText = `1 UZ = ${Rus} RUB`;
+                    znak[0].innerHTML = '&#8381';
+                    znak[1].innerText = 'U';
+                    let number = parseFloat(imp.value) || 0;
+                    result.value = (number * UZS).toFixed(4);
+                    imp.addEventListener('input', function() {
+                        number = parseFloat(this.value) || 0;
+                        result.value = (number * UZS).toFixed(4);
+                    });
+                }
+                else if (value1 === 'UZ' && value2 === 'RUB') {
+                    output1.innerText = `1 UZ = ${Rus} RUB`;
+                    output2.innerText = `1 RUB = ${UZS} UZ`;
+                    znak[0].innerText = 'U';
+                    znak[1].innerHTML = '&#8381';
+                    let number = parseFloat(imp.value) || 0;
+                    result.value = (number * Rus).toFixed(4);
+                    imp.addEventListener('input', function() {
+                        number = parseFloat(this.value) || 0;
+                        result.value = (number * Rus).toFixed(4);
+                    });
+                }
+                else if (value1 === 'RUB' && value2 === 'RUB') {
+                    output1.innerText = `1 RUB = 1 RUB`;
+                    output2.innerText = `1 RUB = 1 RUB`;
+                    znak[0].innerHTML = '&#8381';
+                    znak[1].innerHTML = '&#8381';
+                    let number = parseFloat(imp.value) || 0;
+                    result.value = number;
+                    imp.addEventListener('input', function() {
+                        number = parseFloat(this.value) || 0;
+                        result.value = number;
+                    });
+                }
+                else {
+                    output1.innerText = `1 UZ = 1 UZ`;
+                    output2.innerText = `1 UZ = 1 UZ`;
+                    znak[0].innerText = 'U';
+                    znak[1].innerText = 'U';
+                    let number = parseFloat(imp.value) || 0;
+                    result.value = number;
+                    imp.addEventListener('input', function() {
+                        number = parseFloat(this.value) || 0;
+                        result.value = number;
+                    });
+                }
+            }
+        });
+
+        function changing() {
+            const selectElements = document.querySelectorAll('.currency-select');
+            let value1 = selectElements[0].value;
+            let value2 = selectElements[1].value;
+
+            selectElements[0].value = value2;
+            selectElements[1].value = value1;
+
+            const event1 = new Event('change');
+            const event2 = new Event('change');
+            selectElements[0].dispatchEvent(event1);
+            selectElements[1].dispatchEvent(event2);
+        }
+    </script>
+</body>
+</html>
